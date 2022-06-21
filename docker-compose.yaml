@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  flightpad:
+    image: flightpad
+    build: .
+    ports:
+      - 3000:3000
+    environment:
+        DB_HOST: 'postgres'
+        DB_PORT: 5432
+        DB_USER: 'default'
+        DB_PASSWORD: 'secret'
+        DB_NAME: flightpad_test

@@ -32,3 +32,6 @@ yarn-error.log*
 *.code-workspace
 # vercel
 .vercel
+
+# docker stuff
+.docker
