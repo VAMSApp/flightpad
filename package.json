@@ -1,6 +1,7 @@
 {
   "name": "flightpad",
   "version": "0.1.0",
+  "license": "ISC",
   "private": true,
   "prisma": {
     "seed": "node prisma/seed.js"
