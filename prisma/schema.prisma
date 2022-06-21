@@ -1,0 +1,129 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Pad {
+  id      Int    @id @default(autoincrement())
+  content String @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model Company {
+  id              Int      @id @default(autoincrement())
+  guid            String?   @unique
+  apiKey          String?   @unique
+  syncOnAir       Boolean  @default(false)
+  identifier      String  @unique
+  name            String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @default(now())
+
+  flights Flight[]
+}
+
+model Flight {
+  id               Int    @id @default(autoincrement())
+  departureAirport String
+  arrivalAirport   String
+
+  plannedDepartureTime DateTime? 
+  departedAt DateTime?
+  arrivedAt DateTime?
+  plannedArrivalTime DateTime?
+
+  flightNumber Int    @default(autoincrement())
+  airlineICAO String
+  companyId    Int?
+  flightPlan  String?
+  cruiseAltitude String?
+  aircraftId Int?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  company Company? @relation(fields: [companyId], references: [id])
+  aircraft Aircraft? @relation(fields: [aircraftId], references: [id])
+}
+
+model Aircraft {
+  id Int @id @default(autoincrement())
+  identifier String @db.VarChar(6) @unique
+  shortName String
+  
+  aircraftTypeId Int @default(0)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  aircraftType AircraftType @relation(fields: [aircraftTypeId], references: [id])
+  flights  Flight[]
+}
+
+model AircraftType {
+  id Int @id @default(autoincrement())
+  name String
+  shortName String @unique
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  aircrafts Aircraft[]
+}
+
+// model Airport {
+//   id Int @id @default(autoincrement())
+//   Guid String @unique
+//   icao String @unique
+//   iata String @unique
+//   state String
+//   countryCode String
+//   city String
+//   latitude Decimal
+//   longitude Decimal
+//   elevation Decimal
+//   size Int
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @default(now())
+
+//   runways Runway[]
+// }
+
+// model Runway {
+//   id Int @id @default(autoincrement())
+//   airportId Int
+//   Guid String @unique
+//   name String
+//   latitude Decimal
+//   longitude Decimal
+//   magneticHeading Int
+//   length Int
+//   width Int
+//   hasIls Boolean @default(false)
+//   ilsFrequency Decimal
+//   ilsId String
+//   ilsSlope Decimal
+//   ilsMagneticHeading Int
+//   thresholdElevation Decimal
+//   surfaceType Int
+//   runwayType Int
+//   approachLights String
+//   endLights Boolean
+//   centerLights Int
+//   edgeLights Int
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @default(now())
+
+//   aiport Airport @relation(fields: [airportId], references: [id])
+// }
