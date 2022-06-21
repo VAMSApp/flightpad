@@ -2,7 +2,6 @@ version: '3'
 
 services:
   flightpad:
-    image: flightpad
     build: .
     ports:
       - 3000:3000
@@ -12,3 +11,14 @@ services:
         DB_USER: 'default'
         DB_PASSWORD: 'secret'
         DB_NAME: flightpad_test
+    depends_on:
+      - postgres
+  postgres:
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: secret
+      PGDATA: '/var/lib/postgresql/data/pgdata'
+    volumes:
+      - '.docker/data/postgres:/var/lib/postgresql/data'
