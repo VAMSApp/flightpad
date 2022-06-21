@@ -18,7 +18,7 @@ export const TextArea = TextAreaComponent
 
 // export const Feedback = FormControl.Feedback
 
-export default {
+const FormComponents = {
     Input,
     UsernameInput,
     Checkbox,
@@ -28,3 +28,5 @@ export default {
     SelectInput,
     TextArea,
 }
+
+export default FormComponents

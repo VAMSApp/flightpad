@@ -25,7 +25,7 @@ export function PadModalDelete ({ pad, }) {
         </Button>
         <Modal show={visible} onHide={toggle}>
         <Modal.Header closeButton>
-            <Modal.Title>What's your pad?</Modal.Title>
+            <Modal.Title>What&apos;s your pad?</Modal.Title>
         </Modal.Header>
         <Modal.Body>
             
