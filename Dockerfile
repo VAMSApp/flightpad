@@ -9,6 +9,7 @@ RUN npm install
 ENV NEXT_TELEMETRY_DISABLED 1
 
 RUN npx prisma migrate deploy
+RUN npx prisma db seed
 RUN npx prisma generate
 
 RUN npm run build
