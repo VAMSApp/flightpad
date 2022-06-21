@@ -15,7 +15,7 @@ export const companyRepo = {
 }
 
 
-export async function findAll(opts) {
+async function findAll(opts) {
     return await prisma.company.findMany()
     .then((x) => {
         if (opts.stringify) {
@@ -26,7 +26,7 @@ export async function findAll(opts) {
     })
 }
 
-export async function findById(id, opts) {
+async function findById(id, opts) {
     if (!id) throw 'No ID provided'
 
     return await prisma.company.findUnique({
@@ -38,7 +38,7 @@ export async function findById(id, opts) {
 }
 
 
-export async function findByGuid (guid, opts) {
+async function findByGuid (guid, opts) {
     if (!guid) throw 'No GUID provided'
 
     let query = {
@@ -55,7 +55,7 @@ export async function findByGuid (guid, opts) {
 
 }
 
-export async function findByICAO (icao, opts) {
+async function findByICAO (icao, opts) {
     if (!icao) throw 'No ICAO provided'
 
     let query = {
@@ -73,7 +73,7 @@ export async function findByICAO (icao, opts) {
 }
 
 
-export async function create(data, opts) {
+async function create(data, opts) {
     if (!data) throw 'No data provided'
     data = (typeof data === 'string') ? JSON.parse(data) : data
 
@@ -94,7 +94,7 @@ export async function create(data, opts) {
     return await prisma.company.create(query)
 }
 
-export async function update(id, data, opts) {
+async function update(id, data, opts) {
     if (!id) throw 'No ID provided'
     if (!data) throw 'Nothing being updated'
 
@@ -115,7 +115,7 @@ export async function update(id, data, opts) {
     return await prisma.company.update(query)
 }
 
-export async function toggleOnAirSync(id, opts) {
+async function toggleOnAirSync(id, opts) {
     if (!id) throw 'No ID provided'
     let x = await findById(id)
 
@@ -126,7 +126,7 @@ export async function toggleOnAirSync(id, opts) {
     return x
 }
 
-export async function _delete(id, opts) {
+async function _delete(id, opts) {
     if (!id) throw 'No ID provided'
 
     let query = {

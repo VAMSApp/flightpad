@@ -10,14 +10,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Pad {
-  id      Int    @id @default(autoincrement())
-  content String @db.Text
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-}
-
 model Company {
   id              Int      @id @default(autoincrement())
   guid            String?   @unique
