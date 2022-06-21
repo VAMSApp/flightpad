@@ -15,7 +15,7 @@ export const aircraftRepo = {
     findAircraftTypeById: findAircraftTypeById,
 }
 
-export async function findAll(opts) {
+async function findAll(opts) {
     let query = {}
 
     if (opts?.include) {
@@ -33,7 +33,7 @@ export async function findAll(opts) {
     })
 }
 
-export async function findById(id, opts) {
+async function findById(id, opts) {
     if (!id) throw 'No ID provided'
 
     let query = {
@@ -55,7 +55,7 @@ export async function findById(id, opts) {
     })
 }
 
-export async function searchForIdentifier(q, opts) {
+async function searchForIdentifier(q, opts) {
     if (!q) throw 'No Query provided'
     
     let query = {
@@ -79,7 +79,7 @@ export async function searchForIdentifier(q, opts) {
     })
 }
 
-export async function findByIdentifier(identifier, opts) {
+async function findByIdentifier(identifier, opts) {
     if (!identifier) throw 'No Identifier provided'
 
     let query = {
@@ -102,7 +102,7 @@ export async function findByIdentifier(identifier, opts) {
 }
 
 
-export async function create(data, opts) {
+async function create(data, opts) {
     if (!data) throw 'No data provided'
     data = (typeof data === 'string') ? JSON.parse(data) : data
     
@@ -131,7 +131,7 @@ export async function create(data, opts) {
     })
 }
 
-export async function update(id, data, opts) {
+async function update(id, data, opts) {
     if (!id) throw 'No ID provided'
     if (!data) throw 'Nothing being updated'
 
@@ -164,7 +164,7 @@ export async function update(id, data, opts) {
     })
 }
 
-export async function _delete(id, opts) {
+async function _delete(id, opts) {
     if (!id) throw 'No ID provided'
 
     let query = {
@@ -186,7 +186,7 @@ export async function _delete(id, opts) {
     })
 }
 
-export async function findAllAircraftTypes(opts) {
+async function findAllAircraftTypes(opts) {
 
     let query = {}
     if (opts?.include) {
@@ -202,7 +202,7 @@ export async function findAllAircraftTypes(opts) {
     })
 }
 
-export async function findAircraftTypeById(id, opts) {
+async function findAircraftTypeById(id, opts) {
     if (!id) throw 'No ID provided'
     
     let query = {

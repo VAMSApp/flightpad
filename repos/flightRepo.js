@@ -11,7 +11,7 @@ export const flightRepo = {
     delete: _delete
 }
 
-export async function findAll(opts) {
+async function findAll(opts) {
     return await prisma.flight.findMany()
     .then((x) => {
         if (opts.stringify) {
@@ -22,7 +22,7 @@ export async function findAll(opts) {
     })
 }
 
-export async function findById(id, opts) {
+async function findById(id, opts) {
     if (!id) throw 'No ID provided'
 
     return await prisma.flight.findUnique({
@@ -33,7 +33,7 @@ export async function findById(id, opts) {
     })
 }
 
-export async function create(data, opts) {
+async function create(data, opts) {
     if (!data) throw 'No data provided'
     data = (typeof data === 'string') ? JSON.parse(data) : data
     
@@ -50,7 +50,7 @@ export async function create(data, opts) {
     return await prisma.flight.create(query)
 }
 
-export async function update(id, data, opts) {
+async function update(id, data, opts) {
     if (!id) throw 'No ID provided'
     if (!data) throw 'Nothing being updated'
 
@@ -80,7 +80,7 @@ export async function update(id, data, opts) {
     return await prisma.flight.update(query)
 }
 
-export async function _delete(id, opts) {
+async function _delete(id, opts) {
     if (!id) throw 'No ID provided'
 
     let query = {
