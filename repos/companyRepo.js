@@ -1,7 +1,5 @@
 import _ from 'lodash'
-
-import { PrismaClient } from '@prisma/client'
-const prisma = new PrismaClient()
+import { prisma } from 'db'
 
 export const companyRepo = {
     findAll,
@@ -9,14 +7,23 @@ export const companyRepo = {
     findByICAO,
     findById,
     create,
-    toggleOnAirSync,
+    trackOnAirCompany,
+    trackOnAirFleet,
+    trackOnAirFlights,
+    trackOnAirEmployees,
     update,
     delete: _delete
 }
 
 
 async function findAll(opts) {
-    return await prisma.company.findMany()
+    let query = {}
+
+    if (opts?.include) {
+        query.include = opts.include
+    }
+
+    return await prisma.company.findMany(query)
     .then((x) => {
         if (opts.stringify) {
             return JSON.parse(JSON.stringify(x))
@@ -29,11 +36,23 @@ async function findAll(opts) {
 async function findById(id, opts) {
     if (!id) throw 'No ID provided'
 
-    return await prisma.company.findUnique({
+    let query = {
         where: {
             id: (typeof id !== 'number') ? parseInt(id) : id
-        },
-        opts: opts
+        }
+    }
+
+    if (opts?.include) {
+        query.include = opts.include
+    }
+
+    return await prisma.company.findUnique(query)
+    .then((x) => {
+        if (opts.stringify) {
+            return JSON.parse(JSON.stringify(x))
+        } else {
+            return x
+        }
     })
 }
 
@@ -47,11 +66,18 @@ async function findByGuid (guid, opts) {
         }
     }
 
-    if (opts.include) {
+    if (opts?.include) {
         query.include = opts.include
     }
     
     return await prisma.company.findUnique(query)
+    .then((x) => {
+        if (opts.stringify) {
+            return JSON.parse(JSON.stringify(x))
+        } else {
+            return x
+        }
+    })
 
 }
 
@@ -69,6 +95,13 @@ async function findByICAO (icao, opts) {
     }
 
     return await prisma.company.findUnique(query)
+    .then((x) => {
+        if (opts.stringify) {
+            return JSON.parse(JSON.stringify(x))
+        } else {
+            return x
+        }
+    })
 
 }
 
@@ -78,10 +111,22 @@ async function create(data, opts) {
     data = (typeof data === 'string') ? JSON.parse(data) : data
 
     console.log('companyRepo::create()::data', data)
-
+    
     let query = {
         data: {
-            ...data,
+            uuid: data.uuid,
+            apiKey: data.apiKey,
+            identifier: data.identifier,
+            name: data.name,
+            syncOnAirCompany: data.trackOnAirCompany,
+            syncOnAirFleet: data.trackOnAirFleet,
+            syncOnAirFlights: data.trackOnAirFlights,
+            syncOnAirEmployees: data.trackOnAirEmployees,
+            world: {
+                connect: {
+                    id: data.worldId
+                }
+            }
         },
     }
 
@@ -92,6 +137,13 @@ async function create(data, opts) {
     console.log('companyRepo::create()::query', query)
 
     return await prisma.company.create(query)
+    .then((x) => {
+        if (opts.stringify) {
+            return JSON.parse(JSON.stringify(x))
+        } else {
+            return x
+        }
+    })
 }
 
 async function update(id, data, opts) {
@@ -103,7 +155,14 @@ async function update(id, data, opts) {
     let query = {
         where: { id: (typeof id !== 'number') ? parseInt(id) : id },
         data: {
-            ...data,
+            uuid: data.guid,
+            apiKey: data.apiKey,
+            identifier: data.identifier,
+            name: data.name,
+            syncOnAirCompany: data.trackOnAirCompany,
+            syncOnAirFleet: data.trackOnAirFleet,
+            syncOnAirFlights: data.trackOnAirFlights,
+            syncOnAirEmployees: data.trackOnAirEmployees,
             updatedAt: new Date(),
         },
     }
@@ -113,18 +172,65 @@ async function update(id, data, opts) {
     }
 
     return await prisma.company.update(query)
+    .then((x) => {
+        if (opts.stringify) {
+            return JSON.parse(JSON.stringify(x))
+        } else {
+            return x
+        }
+    })
 }
 
-async function toggleOnAirSync(id, opts) {
+async function trackOnAirCompany(id, opts) {
     if (!id) throw 'No ID provided'
     let x = await findById(id)
 
     x = await update(x.id, {
-        syncOnAir: !x.syncOnAir
-    })
+        ...x,
+        trackOnAirCompany: !x.trackOnAirCompany
+    }, opts)
 
     return x
 }
+
+async function trackOnAirFleet(id, opts) {
+    if (!id) throw 'No ID provided'
+    let x = await findById(id)
+
+    x = await update(x.id, {
+        ...x,
+        trackOnAirFleet: !x.trackOnAirFleet
+    }, opts)
+
+    return x
+}
+
+async function trackOnAirFlights(id, opts) {
+    if (!id) throw 'No ID provided'
+    let x = await findById(id)
+
+    x = await update(x.id, {
+        ...x,
+        trackOnAirFlights: !x.trackOnAirFlights
+    }, opts)
+
+    return x
+}
+
+async function trackOnAirEmployees(id, opts) {
+    if (!id) throw 'No ID provided'
+    let x = await findById(id)
+
+    x = await update(x.id, {
+        ...x,
+        trackOnAirEmployees: !x.trackOnAirFleet
+    }, opts)
+
+    return x
+}
+
+
+
 
 async function _delete(id, opts) {
     if (!id) throw 'No ID provided'
@@ -140,6 +246,13 @@ async function _delete(id, opts) {
     }
 
     return await prisma.company.delete(query)
+    .then((x) => {
+        if (opts.stringify) {
+            return JSON.parse(JSON.stringify(x))
+        } else {
+            return x
+        }
+    })
 }
 
 export default companyRepo

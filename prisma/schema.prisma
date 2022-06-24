@@ -10,112 +10,205 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Company {
-  id              Int      @id @default(autoincrement())
-  guid            String?   @unique
-  apiKey          String?   @unique
-  syncOnAir       Boolean  @default(false)
-  identifier      String  @unique
-  name            String
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @default(now())
-
-  flights Flight[]
+model world {
+  id                    Int       @id @default(autoincrement())
+  // Fuel100LLBasePrice    Int
+  // FuelJetBasePrice      Int
+  // JobsBaseBonus         Int
+  // JobsMaxBonus          Int
+  isSurvival            Boolean   @default(false)
+  isHumanOnly           Boolean   @default(false)
+  uuid                  String    @unique
+  name                  String
+  shortName             String
+  enableEconomicBalance Boolean   @default(false)
+  companies             company[]
 }
 
-model Flight {
+model company {
+  id                 Int       @id @default(autoincrement())
+  name               String
+  identifier         String    @unique
+  level              Int?
+  checkrideLevel     Int?
+  levelXP            Int?
+  reputation         Decimal?
+  initSync           Boolean?  @default(false)
+  firstSyncedAt      DateTime?
+  lastSyncedAt       DateTime?
+  uuid               String?   @unique
+  worlduuid          String?
+  worldId            Int?
+  apiKey             String?   @unique
+  syncOnAirCompany   Boolean?  @default(false)
+  syncOnAirFleet     Boolean?  @default(false)
+  syncOnAirFlights   Boolean?  @default(false)
+  syncOnAirEmployees Boolean?  @default(false)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @default(now())
+
+  flights flight[]
+  world   world?   @relation(fields: [worldId], references: [id])
+}
+
+model flight {
   id               Int    @id @default(autoincrement())
   departureAirport String
   arrivalAirport   String
 
-  plannedDepartureTime DateTime? 
-  departedAt DateTime?
-  arrivedAt DateTime?
-  plannedArrivalTime DateTime?
+  plannedDepartureTime DateTime?
+  departedAt           DateTime?
+  arrivedAt            DateTime?
+  plannedArrivalTime   DateTime?
 
-  flightNumber Int    @default(autoincrement())
-  airlineICAO String
-  companyId    Int?
-  flightPlan  String?
+  flightNumber   Int     @default(autoincrement())
+  airlineICAO    String
+  companyId      Int?
+  flightPlan     String?
   cruiseAltitude String?
-  aircraftId Int?
-  
+  aircraftId     Int?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
-  company Company? @relation(fields: [companyId], references: [id])
-  aircraft Aircraft? @relation(fields: [aircraftId], references: [id])
+  company  company?  @relation(fields: [companyId], references: [id])
+  aircraft aircraft? @relation(fields: [aircraftId], references: [id])
 }
 
-model Aircraft {
-  id Int @id @default(autoincrement())
-  identifier String @db.VarChar(6) @unique
-  shortName String
-  
+model aircraft {
+  id         Int    @id @default(autoincrement())
+  identifier String @unique @db.VarChar(6)
+  shortName  String
+
   aircraftTypeId Int @default(0)
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
-  aircraftType AircraftType @relation(fields: [aircraftTypeId], references: [id])
-  flights  Flight[]
+  aircraftType aircraftType @relation(fields: [aircraftTypeId], references: [id])
+  flights      flight[]
 }
 
-model AircraftType {
-  id Int @id @default(autoincrement())
-  name String
+model aircraftType {
+  id                         Int           @id @default(autoincrement())
+  airportMinSize             Int
+  seats                      Int           @default(1)
+  flightsCount               Int
+  fuelTypeId                 Int
+  aircraftClassId            Int
+  numberOfEngines            Int           @default(1)
+  engineTypeId               Int
+  uuid                       String        @unique
+  displayName                String
+  typeName                   String
+  aircraftClassUuid          String?
+  isDisabled                 Boolean       @default(false)
+  isFighter                  Boolean       @default(false)
+  needsCopilot               Boolean       @default(false)
+  basePrice                  Decimal
+  emptyWeight                Decimal
+  timeBetweenOverhaul        Decimal?
+  hightimeAirframe           Decimal?
+  maximumGrossWeight         Decimal?
+  estimatedCruiseFF          Decimal?
+  fuelTotalCapacityInGallons Decimal?
+  maximumCargoWeight         Decimal?
+  maximumRangeInHour         Decimal?
+  maximumRangeInNM           Decimal?
+  designSpeedVS0             Decimal?
+  designSpeedVS1             Decimal?
+  designSpeedVC              Decimal?
+  standardSeatWeight         Decimal?
+  aircraftClass              aircraftClass @relation(fields: [aircraftClassId], references: [id])
+  fuelType                   fuelType      @relation(fields: [fuelTypeId], references: [id])
+  aircraft                   aircraft[]
+  engineType                 engineType?   @relation(fields: [engineTypeId], references: [oaId])
+}
+
+model engineType {
+  id            Int
+  oaId          Int            @unique
+  name          String
+  aircraftTypes aircraftType[]
+}
+
+model fuelType {
+  id            Int            @id @default(autoincrement())
+  oAId          Int            @unique
+  name          String
+  aircraftTypes aircraftType[]
+}
+
+model aircraftClass {
+  id        Int    @id @default(autoincrement())
+  uuid      String @unique
+  name      String
   shortName String @unique
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
-  aircrafts Aircraft[]
+  aircraftType aircraftType[]
 }
 
-// model Airport {
-//   id Int @id @default(autoincrement())
-//   Guid String @unique
-//   icao String @unique
-//   iata String @unique
-//   state String
-//   countryCode String
-//   city String
-//   latitude Decimal
-//   longitude Decimal
-//   elevation Decimal
-//   size Int
+model airport {
+  id          Int     @id @default(autoincrement())
+  guid        String  @unique
+  icao        String  @unique
+  iata        String  @unique
+  state       String
+  countryCode String
+  city        String
+  latitude    Decimal
+  longitude   Decimal
+  elevation   Decimal
+  size        Int
 
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 
-//   runways Runway[]
-// }
+  runways runway[]
+  parking airportLocations[]
+}
 
-// model Runway {
-//   id Int @id @default(autoincrement())
-//   airportId Int
-//   Guid String @unique
-//   name String
-//   latitude Decimal
-//   longitude Decimal
-//   magneticHeading Int
-//   length Int
-//   width Int
-//   hasIls Boolean @default(false)
-//   ilsFrequency Decimal
-//   ilsId String
-//   ilsSlope Decimal
-//   ilsMagneticHeading Int
-//   thresholdElevation Decimal
-//   surfaceType Int
-//   runwayType Int
-//   approachLights String
-//   endLights Boolean
-//   centerLights Int
-//   edgeLights Int
+model runway {
+  id                 Int     @id @default(autoincrement())
+  guid               String  @unique
+  airportId          Int
+  name               String
+  latitude           Decimal
+  longitude          Decimal
+  magneticHeading    Int
+  length             Int
+  width              Int
+  hasIls             Boolean @default(false)
+  ilsFrequency       Decimal
+  ilsId              String
+  ilsSlope           Decimal
+  ilsMagneticHeading Int
+  thresholdElevation Decimal
+  surfaceType        Int
+  runwayType         Int
+  approachLights     String
+  endLights          Boolean
+  centerLights       Int
+  edgeLights         Int
 
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 
-//   aiport Airport @relation(fields: [airportId], references: [id])
-// }
+  aiport airport @relation(fields: [airportId], references: [id])
+}
+
+model airportLocations {
+  id              Int     @id @default(autoincrement())
+  guid            String  @unique
+  airportdId      Int
+  name            String
+  latitude        Decimal
+  longitude       Decimal
+  magneticHeading Int
+  type            Int
+
+  airport airport @relation(fields: [airportdId], references: [id])
+}

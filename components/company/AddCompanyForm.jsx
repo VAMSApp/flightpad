@@ -1,4 +1,4 @@
-import { faTrash, faTrashAlt } from '@fortawesome/free-solid-svg-icons'
+import { faSpinner, faTrash, faTrashAlt } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React, { useEffect, useState } from 'react'
 import { Row, Col, Form, Button, FloatingLabel, ButtonGroup, FormControl } from 'react-bootstrap'
@@ -31,29 +31,50 @@ const companySchema = Yup.object().shape({
     .matches(uuid4RegExp, 'Company API Key is not correct'),
 }).required()
 
-export function AddCompanyForm({ worlds, doSubmit, }) {
+export function AddCompanyForm({ worlds, doSubmit, defaults, storeDefaults }) {
+
   const initialState = {
-    syncOnAir: false,
     identifier: '',
     name: '',
-    guid: '3a5bdf29-82f8-4c3c-8d21-ccbca8dfca34',
-    apiKey: '5e4c21b0-59a3-4113-a5eb-16e8eca0ef51',
+    guid: defaults?.guid || '',
+    apiKey: defaults?.apiKey || '',
+    worlduuid: '',
+    worldId: '',
+    level: '',
+    checkrideLevel: '',
+    levelXP: '',
+    reputation: '',
+    syncOnAirCompany: false,
+    syncOnAirEmployees: false,
+    syncOnAirFleet: false,
+    syncOnAirFlights: false,
     isLoading: false,
     hasLoaded: false,
     formIsValid: false,
+    firstLoad: true,
   }
 
   const [state, setState] = useState(initialState)
-
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const {
     identifier,
     name,
-    syncOnAir,
     guid,
+    syncOnAirCompany,
+    syncOnAirEmployees,
+    syncOnAirFleet,
+    syncOnAirFlights,
     apiKey,
+    level,
+    checkrideLevel,
+    levelXP,
+    reputation,
     isLoading,
     hasLoaded,
     formIsValid,
+    firstLoad,
+    worlduuid,
+    worldId,
   } = state
 
   const loadOnAirCompanyDetails = async () => {
@@ -74,6 +95,13 @@ export function AddCompanyForm({ worlds, doSubmit, }) {
         name: company.Name,
       })
     })
+    .catch((err) => {
+      setState({
+        ...state,
+        hasLoaded:true,
+        isLoading: false,
+      })
+    })
 
   }
 
@@ -83,13 +111,29 @@ export function AddCompanyForm({ worlds, doSubmit, }) {
     let x = {
       name,
       identifier,
-      syncOnAir,
-      guid: (syncOnAir && guid) ? guid : undefined,
-      apiKey: (syncOnAir && apiKey) ? apiKey : undefined,
+      syncOnAirCompany,
+      syncOnAirEmployees,
+      syncOnAirFleet,
+      syncOnAirFlights,
+      level,
+      checkrideLevel,
+      levelXP,
+      reputation,
+      worlduuid,
+      worldId,
+      guid: (syncOnAirCompany && guid) ? guid : undefined,
+      apiKey: (syncOnAirCompany && apiKey) ? apiKey : undefined,
     }
 
     console.log('addCompanyForm::onSubmit', x)
+    setIsSubmitting(true)
     doSubmit(x)
+    .then((c) => {
+      setIsSubmitting(false)
+    })
+    .catch((e) => {
+      setIsSubmitting(false)
+    })
   }
 
   const toggleIsLoadding = (override) => {
@@ -122,6 +166,19 @@ export function AddCompanyForm({ worlds, doSubmit, }) {
     })
   }
 
+  useEffect(function () {
+    if (syncOnAirCompany && firstLoad) {
+      console.log('AddCompanyForm::useEffect-firstLoad()')
+      setState({
+        ...state,
+        guid: defaults.guid,
+        apiKey: defaults.apiKey,
+        firstLoad: false,
+      })
+    }
+
+  }, [defaults?.apiKey, defaults?.guid, firstLoad, state, syncOnAirCompany])
+
   return (
     <div>
       <Form onSubmit={onSubmit}>
@@ -130,15 +187,58 @@ export function AddCompanyForm({ worlds, doSubmit, }) {
             <Form.Group>
               <Form.Check
                 type='switch'
-                name='syncOnAir'
-                id='syncOnAir'
+                name='syncOnAirCompany'
+                id='syncOnAirCompany'
                 label='Sync OnAir?'
                 onChange={handleFieldChange}
-                value={syncOnAir}
+                value={syncOnAirCompany}
                 className='mb-3'
               />
             </Form.Group>
           </Col>
+          {syncOnAirCompany &&
+          <>
+          <Col>
+            <Form.Group>
+              <Form.Check
+                type='switch'
+                name='trackOnAirFleet'
+                id='trackOnAirFleet'
+                label='Sync OnAir Fleet?'
+                onChange={handleFieldChange}
+                value={syncOnAirFleet}
+                className='mb-3'
+              />
+            </Form.Group>
+          </Col>
+          <Col>
+            <Form.Group>
+              <Form.Check
+                type='switch'
+                name='syncOnAirFlights'
+                id='syncOnAirFlights'
+                label='Sync OnAir Flights?'
+                onChange={handleFieldChange}
+                value={syncOnAirFlights}
+                className='mb-3'
+              />
+            </Form.Group>
+          </Col>
+          <Col>
+            <Form.Group>
+              <Form.Check
+                type='switch'
+                name='syncOnAirEmployees'
+                id='syncOnAirEmployees'
+                label='Sync OnAir Employees?'
+                onChange={handleFieldChange}
+                value={syncOnAirEmployees}
+                className='mb-3'
+              />
+            </Form.Group>
+          </Col>
+          </>
+          }
         </Row>
         <Row>
           <Col md={4}>
@@ -151,7 +251,7 @@ export function AddCompanyForm({ worlds, doSubmit, }) {
                   className='mb-3'
                   defaultValue={identifier}
                   onChange={handleFieldChange}
-                  disabled={(syncOnAir === true)}
+                  disabled={(syncOnAirCompany === true)}
                 />
               </FloatingLabel>
             </Form.Group>
@@ -166,14 +266,40 @@ export function AddCompanyForm({ worlds, doSubmit, }) {
                   className='mb-3'
                   defaultValue={name}
                   onChange={handleFieldChange}
-                  disabled={(syncOnAir === true)}
+                  disabled={(syncOnAirCompany === true)}
                 />
               </FloatingLabel>
             </Form.Group>
           </Col>
         </Row>
-        {syncOnAir &&
+        {syncOnAirCompany &&
         <>
+        <Row>
+          <Col md={6}>
+            <Form.Group>
+              level levelXP
+            </Form.Group>
+            <Form.Group>
+              reputation
+            </Form.Group>
+
+          </Col>
+          <Col md={6}>
+            <Form.Group>
+              <FloatingLabel label='Onair World'>
+                <Form.Select
+                  name='worldId'
+                  id='worldId'
+                  className='mb-3'
+                  onChange={handleFieldChange}
+                  value={worldId}
+                >
+                  {worlds.map((w, k) => (<option key={k} value={w.id}>{`${w.shortName}`}</option>))}
+                </Form.Select>
+              </FloatingLabel>
+            </Form.Group>
+          </Col>
+        </Row>
         <Row>
           <Col md={6}>
           <Form.Group>
@@ -211,7 +337,10 @@ export function AddCompanyForm({ worlds, doSubmit, }) {
                 onClick={loadOnAirCompanyDetails}
                 disabled={(hasLoaded || isLoading || (!apiKey || !guid))}
               >
-                Load OnAir Company Details
+                {(isLoading) 
+                  ? (<FontAwesomeIcon icon={faSpinner} spin />)
+                  : 'Load OnAir Company Details'
+                }
               </Button>
           </Col>
         </Row>
@@ -224,12 +353,26 @@ export function AddCompanyForm({ worlds, doSubmit, }) {
         </Row>
         <Row>
           <Col>
-            <Button
-              type='submit'
-              variant='success'
-            >
-              Submit
-            </Button>
+            <ButtonGroup>
+              <Button
+                type='submit'
+                variant='success'
+                disabled={isSubmitting}
+              >
+                {(isSubmitting) 
+                  ? (<span>
+                      <FontAwesomeIcon icon={faSpinner} spin/>
+                      &nbsp;Submitting
+                    </span>)
+                  :'Submit'
+                }
+              </Button>
+              <Button
+                type='button'
+                variant='light'
+                onClick={(e) => storeDefaults({ guid, apiKey })}
+              >Store Defaults</Button>
+            </ButtonGroup>
           </Col>
         </Row>
       </Form>

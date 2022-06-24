@@ -2,14 +2,34 @@ import { apiHandler, omit } from 'helpers/api'
 import { companyRepo, } from 'repos'
 
 export default apiHandler({
-    get: getAllCompanies,
+    get: getCompany,
+    delete: deleteCompany,
     post: createCompany,
 });
 
 
-async function getAllCompanies(req, res) {
-   
-    let x = await companyRepo.findAll()
+async function getCompany(req, res) {
+    const {
+        id
+    } = req.query
+
+    if (!id) throw 'No ID provided'
+
+    let x = await companyRepo.findById(id, {
+        stringify: true,
+    })
+
+    return res.status(200).json(x);
+}
+
+async function deleteCompany(req, res) {
+    const {
+        id
+    } = req.query
+
+    if (!id) throw 'No ID provided'
+
+    let x = await companyRepo.delete(id)
 
     return res.status(200).json(x);
 }
@@ -25,17 +45,22 @@ async function createCompany(req, res) {
         syncOnAir,
         name,
         identifier,
+        worlduuid,
+        worldId,
     } = body.content
 
     const x = {
-        guid: (guid) ? guid : undefined,
+        uuid: (guid) ? guid : undefined,
         apiKey: (apiKey) ? apiKey : undefined,
         syncOnAir: syncOnAir,
         name: name,
         identifier: identifier,
+        worlduuid: worlduuid,
+        worldId: worldId,
     }
 
     console.log('createCompany()', x)
+    
     let company = await companyRepo.create(x)
 
     console.log(company)

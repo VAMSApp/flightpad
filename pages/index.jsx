@@ -14,52 +14,39 @@ import { FlightsTable, AddFlightForm } from 'components/flight'
 import { PrismaClient } from '@prisma/client'
 import { CompanyTable } from 'components/company'
 import { FleetTable, } from 'components/aircraft'
-
 import { flightService, companyService, } from 'services'
+import Repos from 'repos'
 
 export async function getServerSideProps(context) {
-  const prisma = new PrismaClient()
+  let flights = await Repos.flightRepo.findAll({
+    stringify: true,
+  })
 
-  let flights = await prisma.flight.findMany().then((x) => JSON.parse(JSON.stringify(x)))
-  let companies = await prisma.company.findMany().then((x) => JSON.parse(JSON.stringify(x)))
-  let company = await prisma.company.findFirst().then((x) => JSON.parse(JSON.stringify(x)))
-  let fleet = await prisma.aircraft.findMany({
+  let companies = await Repos.companyRepo.findAll({
+    stringify: true,
+  })
+
+  let fleet = await Repos.aircraftRepo.findAll({
+    stringify: true,
     include: {
       aircraftType: true
     }
-  }).then((x) => JSON.parse(JSON.stringify(x)))
-  let aircraftTypes = await prisma.aircraftType.findMany().then((x) => JSON.parse(JSON.stringify(x)))
+  })
 
-  let nextFlightNumber = await prisma.flight.findFirst({
-    select: {
-      flightNumber: true,
-      id: true,
-    },
-    orderBy: {
-      id: 'desc',
-    }
-  }).then((flight) => {
-    let flightNumber = process.env.STARTING_FLIGHT_NUMBER
-    console.log('nextFlightNumber()', flight, flightNumber)
+  let aircraftTypes = await Repos.aircraftRepo.findAllAircraftClass({
+    stringify: true
+  })
 
-    if (flight) {
-      console.log('flights exist, ')
-      flightNumber = flight.flightNumber + 1;
-    }
-
-    console.log(`nextFlightNumber is ${flightNumber}`)
-
-    return flightNumber
-  });
+  let nextFlightNumber = await Repos.flightRepo.nextFlightNumber();
 
   return {
     props: {
-      flights: flights,
-      companies: companies,
-      company: company,
-      fleet: fleet,
-      aircraftTypes: aircraftTypes,
-      nextFlightNumber: nextFlightNumber,
+      flights: flights || undefined,
+      companies: companies || null,
+      company: company || null,
+      fleet: fleet || undefined,
+      aircraftTypes: aircraftTypes || undefined,
+      nextFlightNumber: nextFlightNumber || undefined,
     }
   }
 }
@@ -133,7 +120,7 @@ export default function Home({ flights, companies, company, aircraftTypes, fleet
             <Col>
               <CompanyTable
                 data={companies}
-                toggleOnAirSync={toggleOnAirSync} 
+                toggleOnAirSync={toggleOnAirSync}
               />
             </Col>
           </Row>

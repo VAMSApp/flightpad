@@ -15,7 +15,10 @@ export const companyService = {
     findByGuid: getByGuid,
     findByICAO: getByICAO,
     findAll: getAll,
-    toggleOnAirSync,
+    toggleOnAirCompanyTracking,
+    toggleOnAirFleetTracking,
+    toggleOnAirFlightsTracking,
+    toggleOnAirEmployeesTracking,
     create,
     update,
     destroy,
@@ -31,11 +34,32 @@ async function getAll() {
     return await fetchWrapper.get(baseUrl);
 }
 
-async function toggleOnAirSync(id, params) {
+async function toggleOnAirCompanyTracking(id, params) {
     if (!id) throw 'No id provided to toggle OnAirSync'
     
-    return await fetchWrapper.put(`${baseUrl}/${id}/toggleOnAirSync`, params);
+    return await fetchWrapper.put(`${baseUrl}/${id}/toggleOnAirCompanyTracking`, params);
 }
+
+async function toggleOnAirFleetTracking(id, params) {
+    if (!id) throw 'No id provided to toggle OnAirSync'
+    
+    return await fetchWrapper.put(`${baseUrl}/${id}/toggleOnAirFleetTracking`, params);
+}
+
+async function toggleOnAirFlightsTracking(id, params) {
+    if (!id) throw 'No id provided to toggle OnAirSync'
+    
+    return await fetchWrapper.put(`${baseUrl}/${id}/toggleOnAirFlightsTracking`, params);
+}
+
+async function toggleOnAirEmployeesTracking(id, params) {
+    if (!id) throw 'No id provided to toggle OnAirSync'
+    
+    return await fetchWrapper.put(`${baseUrl}/${id}/toggleOnAirEmployeesTracking`, params);
+}
+
+
+
 
 async function getById(id) {
     return await fetchWrapper.get(`${baseUrl}/${id}`);

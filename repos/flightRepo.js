@@ -1,15 +1,16 @@
 import _ from 'lodash'
-
-import { PrismaClient } from '@prisma/client'
-const prisma = new PrismaClient()
+import prisma from 'db'
 
 export const flightRepo = {
     findAll,
     findById,
+    nextFlightNumber,
     create,
     update,
     delete: _delete
 }
+
+export default flightRepo
 
 async function findAll(opts) {
     return await prisma.flight.findMany()
@@ -31,6 +32,31 @@ async function findById(id, opts) {
         },
         opts: opts
     })
+}
+
+async function nextFlightNumber(opts) {
+    return await prisma.flight.findFirst({
+        select: {
+          flightNumber: true,
+          id: true,
+        },
+        orderBy: {
+          id: 'desc',
+        }
+      })
+      .then((flight) => {
+        let flightNumber = process.env.STARTING_FLIGHT_NUMBER
+        console.log('nextFlightNumber()', flight, flightNumber)
+    
+        if (flight) {
+          console.log('flights exist, ')
+          flightNumber = flight.flightNumber + 1;
+        }
+    
+        console.log(`nextFlightNumber is ${flightNumber}`)
+    
+        return flightNumber
+      })
 }
 
 async function create(data, opts) {
@@ -95,5 +121,3 @@ async function _delete(id, opts) {
 
     return await prisma.flight.delete(query)
 }
-
-export default flightRepo

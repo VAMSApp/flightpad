@@ -5,7 +5,33 @@ import { Button, ButtonGroup, Badge, } from 'react-bootstrap'
 import DataTable from 'react-data-table-component'
 import { companyService } from 'services/company.service'
 
-export function CompanyTable ({ data, onDelete, toggleOnAirSync, ...props }) {
+
+async function doDeleteCompany(id) {
+    return await companyService.destroy(id);
+}
+
+async function toggleOnAirCompanyTracking(id) {
+    
+}
+
+export function CompanyTable ({ data, ...props }) {
+    const [isDeleting, setIsDeleting] = useState(false)
+    
+    async function doDelete(e, id) {
+        e.preventDefault()
+        setIsDeleting(true)
+
+        // await companyService.destroy(id)
+        // .then((c) => {
+        //     setIsDeleting(false)
+        // });
+    }
+
+    async function toggleOnAirCompanyTracking(e, id) {
+        e.preventDefault()
+        return await companyService.toggleOnAirCompanyTracking(id)
+    }
+
     const columns = [
         {
             name: 'Identifier',
@@ -17,15 +43,16 @@ export function CompanyTable ({ data, onDelete, toggleOnAirSync, ...props }) {
         },
         {
             name: 'Sync On Air?',
+
             classname: 'text-center',
             cell: (row) => (<Badge
-                bg={(row.syncOnAir) ? 'success' : 'secondary'}
+                bg={(row.trackOnAirCompany) ? 'success' : 'secondary'}
                 style={{
                     cursor: 'pointer'
                 }}
-                onClick={(e) => toggleOnAirSync(row.id)}
+                onClick={(e) => toggleOnAirCompanyTracking(e, row.id)}
             >
-                {(row.syncOnAir)
+                {(row.trackOnAirCompany)
                     ? 'Syncing'
                     : 'Not Syncing'
                 }
@@ -33,16 +60,16 @@ export function CompanyTable ({ data, onDelete, toggleOnAirSync, ...props }) {
         },
         {
             name: 'actions',
+            id: 'actions',
             className: 'text-center',
-            cell: (row) => (<ButtonGroup>
-                <Button
-                    size='md'
-                    variant='danger'
-                    onClick={() => onDelete(row.id)}
-                >
-                    Delete
-                </Button>
-            </ButtonGroup>)
+            cell: (row) => (<Button
+                variant='danger'
+                size='md'
+                onClick={(e) => doDelete(e, row.id)}
+                disabled={(isDeleting)}
+            >
+                Delete
+            </Button>)
         }
     ]
 
@@ -50,6 +77,7 @@ export function CompanyTable ({ data, onDelete, toggleOnAirSync, ...props }) {
         <DataTable
             data={data}
             columns={columns}
+
         />
     </>)
 }

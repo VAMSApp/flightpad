@@ -7,7 +7,8 @@
             "helpers/*": ["helpers/*"],
             "repos/*": ["repos/*"],
             "services/*": ["services/*"],
-            "styles/*": ["styles/*"]
+            "styles/*": ["styles/*"],
+            "db": ["db.js"]
         }
     }
 }

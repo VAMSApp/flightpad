@@ -1,16 +1,14 @@
 import _ from 'lodash'
 import { prisma } from 'db'
 
-export const aircraftRepo = {
+export const airportRepo = {
     findAll,
     findById,
-    findByIdentifier,
-    searchForIdentifier,
+    searchByICAO,
+    searchByIATA,
     create,
     update,
     delete: _delete,
-    findAllAircraftClass: findAllAircraftClass,
-    findAircraftTypeById: findAircraftTypeById,
 }
 
 async function findAll(opts) {
@@ -19,9 +17,8 @@ async function findAll(opts) {
     if (opts?.include) {
         query.include = opts.include
     }
-    console.log(query)
 
-    return await prisma.aircraft.findMany(query)
+    return await prisma.airport.findMany(query)
     .then((x) => {
         if (opts?.stringify) {
             return JSON.parse(JSON.stringify(x))
@@ -44,7 +41,7 @@ async function findById(id, opts) {
         query.include = opts.include
     }
 
-    return await prisma.aircraft.findUnique(query).then((x) => {
+    return await prisma.airport.findUnique(query).then((x) => {
         if (opts?.stringify) {
             return JSON.parse(JSON.stringify(x))
         } else {
@@ -53,12 +50,12 @@ async function findById(id, opts) {
     })
 }
 
-async function searchForIdentifier(q, opts) {
+async function searchByICAO(q, opts) {
     if (!q) throw 'No Query provided'
     
     let query = {
         where: {
-            identifier: {
+            icao: {
                 contains: q
             }
         }
@@ -68,7 +65,7 @@ async function searchForIdentifier(q, opts) {
         query.include = opts.include
     }
 
-    return await prisma.aircraft.findMany(query).then((x) => {
+    return await prisma.airport.findMany(query).then((x) => {
         if (opts?.stringify) {
             return JSON.parse(JSON.stringify(x))
         } else {
@@ -77,12 +74,14 @@ async function searchForIdentifier(q, opts) {
     })
 }
 
-async function findByIdentifier(identifier, opts) {
-    if (!identifier) throw 'No Identifier provided'
-
+async function searchByIATA(q, opts) {
+    if (!q) throw 'No Query provided'
+    
     let query = {
         where: {
-            identifier: identifier
+            iata: {
+                contains: q
+            }
         }
     }
 
@@ -90,7 +89,7 @@ async function findByIdentifier(identifier, opts) {
         query.include = opts.include
     }
 
-    return await prisma.aircraft.findUnique(query).then((x) => {
+    return await prisma.airport.findMany(query).then((x) => {
         if (opts?.stringify) {
             return JSON.parse(JSON.stringify(x))
         } else {
@@ -103,16 +102,24 @@ async function findByIdentifier(identifier, opts) {
 async function create(data, opts) {
     if (!data) throw 'No data provided'
     data = (typeof data === 'string') ? JSON.parse(data) : data
-    
+    const uuid4RegExp = new RegExp(/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i)
+
+    if (!uuid4RegExp.test(data.guid)) {
+        throw 'GUID is not in UUID format'
+    }
+
     let query = {
         data: {
-            shortName: data.shortName,
-            identifier: data.identifier.toUpperCase(),
-            aircraftType: {
-                connect: {
-                    id: parseInt(data.aircraftTypeId),
-                }
-            }
+            guid: data.guid,
+            icao: data.icao,
+            iata: data.iata,
+            state: data.state,
+            countryCode: data.countryCode,
+            city: data.city,
+            latitude: parseFloat(data.latitude),
+            longitude: parseFloat(data.longitude),
+            elevation: parseFloat(data.elevation),
+            size: parseInt(data.size),
         },
     }
 
@@ -120,7 +127,7 @@ async function create(data, opts) {
         query.include = opts.include
     }
 
-    return await prisma.aircraft.create(query).then((x) => {
+    return await prisma.airport.create(query).then((x) => {
         if (opts?.stringify) {
             return JSON.parse(JSON.stringify(x))
         } else {
@@ -138,13 +145,16 @@ async function update(id, data, opts) {
     let query = {
         where: { id: (typeof id !== 'number') ? parseInt(id) : id },
         data: {
-            shortName: data.shortName,
-            identifier: data.identifier.toUpperCase(),
-            aircraftType: {
-                connect: {
-                    id: parseInt(data.aircraftTypeId),
-                }
-            },
+            guid: data.guid,
+            icao: data.icao,
+            iata: data.iata,
+            state: data.state,
+            countryCode: data.countryCode,
+            city: data.city,
+            latitude: parseFloat(data.latitude),
+            longitude: parseFloat(data.longitude),
+            elevation: parseFloat(data.elevation),
+            size: parseInt(data.size),
             updatedAt: new Date(),
         },
     }
@@ -153,7 +163,7 @@ async function update(id, data, opts) {
         query.include = opts.include
     }
 
-    return await prisma.aircraft.update(query).then((x) => {
+    return await prisma.airport.update(query).then((x) => {
         if (opts?.stringify) {
             return JSON.parse(JSON.stringify(x))
         } else {
@@ -175,7 +185,7 @@ async function _delete(id, opts) {
         query.include = opts.include
     }
 
-    return await prisma.aircraft.delete(query).then((x) => {
+    return await prisma.airport.delete(query).then((x) => {
         if (opts?.stringify) {
             return JSON.parse(JSON.stringify(x))
         } else {
@@ -184,14 +194,14 @@ async function _delete(id, opts) {
     })
 }
 
-async function findAllAircraftClass(opts) {
+async function findAllAirportTypes(opts) {
 
     let query = {}
     if (opts?.include) {
         query.include = opts.include
     }
 
-    return await prisma.aircraftClass.findMany(query).then((x) => {
+    return await prisma.airportType.findMany(query).then((x) => {
         if (opts.stringify) {
             return JSON.parse(JSON.stringify(x))
         } else {
@@ -200,7 +210,7 @@ async function findAllAircraftClass(opts) {
     })
 }
 
-async function findAircraftTypeById(id, opts) {
+async function findAirportTypeById(id, opts) {
     if (!id) throw 'No ID provided'
     
     let query = {
@@ -214,7 +224,7 @@ async function findAircraftTypeById(id, opts) {
     }
     
 
-    return await prisma.aircraftType.findUnique(query).then((x) => {
+    return await prisma.airportType.findUnique(query).then((x) => {
         if (opts?.stringify) {
             return JSON.parse(JSON.stringify(x))
         } else {
@@ -223,4 +233,4 @@ async function findAircraftTypeById(id, opts) {
     })
 }
 
-export default aircraftRepo
+export default airportRepo
